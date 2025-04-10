@@ -1,4 +1,5 @@
 # EnergyInformatics - Project 2
+<<<<<<< HEAD
 GENERAL CONSIDERATION 
 Assignment 2 is about wind energy forecasting by using different machine learning 
 techniques. The work to undertake involves data pre-processing, training model building, 
@@ -200,3 +201,7 @@ the model to predict the prices of other houses in Boston.
 Jeff Heaton. You can find these pages in the file ReferenceforQuestion3.pdf. 
 4. Reference for task 4, slide 22-26 in the lecture “Deep Learning for Renewable Energy 
 Forecasting” for mathematical calculation
+=======
+
+###### **Ruben Roca eats Ass**
+>>>>>>> 127a4127e198a4dfcb679490725220d68f51efaf
