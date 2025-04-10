@@ -56,13 +56,50 @@ print("Predictions saved to 'Results/ForecastTemplate2.csv'")
 # Load the actual values from Solution.csv
 solution_data = pd.read_csv('Data/Solution.csv')
 
-# Ensure the predicted and actual data align
-if 'FORECAST' in forecast_template.columns and 'POWER' in solution_data.columns:
-    # Calculate RMSE
-    rmse = np.sqrt(mean_squared_error(solution_data['POWER'], forecast_template['FORECAST']))
-    print("Root Mean Squared Error (RMSE):", rmse)
-else:
-    print("Error: Required columns are missing in the data.")
+# Calculate RMSE
+rmse = np.sqrt(mean_squared_error(solution_data['POWER'], forecast_template['FORECAST']))
+print("Root Mean Squared Error (RMSE):", rmse)
+
+### SIMPLE LINEAR REGRESSION ###
+X_lr = data['WS10']
+y_lr = data['POWER']
+
+# Split the data into training and testing sets
+X_train_lr, X_test_lr, y_train_lr, y_test_lr = train_test_split(X_lr, y_lr, test_size=0.25, random_state=42)
+
+# Create and train the linear regression model
+lr_model = LinearRegression()
+lr_model.fit(X_train_lr.values.reshape(-1, 1), y_train_lr)
+
+forecast_X_lr = forecast_data['WS10']
+forecast_template_lr = pd.read_csv('Data/ForecastTemplate.csv')
+# Predict the power output using the trained model
+forecast_template_lr['FORECAST'] = lr_model.predict(forecast_X_lr.values.reshape(-1, 1))
+
+# Convert TIMESTAMP to datetime for proper plotting
+solution_data['TIMESTAMP'] = pd.to_datetime(solution_data['TIMESTAMP'], format='%Y%m%d %H:%M')
+
+# Generate a range of all days in the month
+all_days = pd.date_range(start=solution_data['TIMESTAMP'].min().date(), 
+                         end=solution_data['TIMESTAMP'].max().date(), freq='D')
+# Plot the data
+plt.figure(figsize=(15, 6))
+plt.plot(solution_data['TIMESTAMP'], solution_data['POWER'], label='Actual Power (Solution)', color='blue')
+plt.plot(solution_data['TIMESTAMP'], forecast_template['FORECAST'], label='Forecasted Power (Model)', color='orange')
+plt.plot(solution_data['TIMESTAMP'], forecast_template_lr['FORECAST'], label='Forecasted Power (Model_LR)', color='green')
+plt.xticks(all_days, [day.strftime('%d') for day in all_days], rotation=45)
+# Add labels, legend, and title
+plt.xlabel('Date')
+plt.ylabel('Power')
+plt.title('Power Comparison: Actual vs Forecasted')
+plt.legend()
+plt.grid()
+plt.tight_layout()
+
+# Show the plot
+plt.show()
+
+
 
 
 

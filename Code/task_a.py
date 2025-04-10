@@ -1,4 +1,4 @@
-# Task B: Wind Power Prediction using Linear Regression
+# Task A: Wind Power Prediction using Multiple Models
 # Import necessary libraries
 import pandas as pd
 import numpy as np
@@ -9,6 +9,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVR
 from sklearn.neural_network import MLPRegressor
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 # Load the dataset
 data = pd.read_csv('Data/TrainData.csv')
@@ -74,34 +75,83 @@ nn_forecast_template.to_csv('Results/ForecastTemplate1-NN.csv', index=False)
 # Load the actual values from Solution.csv
 solution_data = pd.read_csv('Data/Solution.csv')
 
-# Ensure the predicted and actual data align
-if 'FORECAST' in ln_forecast_template.columns and 'POWER' in solution_data.columns:
-    # Calculate RMSE
-    rmse = np.sqrt(mean_squared_error(solution_data['POWER'], ln_forecast_template['FORECAST']))
-    print("LN Root Mean Squared Error (RMSE):", rmse)
-else:
-    print("Error: Required columns are missing in the data.")
-   
-    # Ensure the predicted and actual data align
-if 'FORECAST' in knn_forecast_template.columns and 'POWER' in solution_data.columns:
-    # Calculate RMSE
-    rmse = np.sqrt(mean_squared_error(solution_data['POWER'], knn_forecast_template['FORECAST']))
-    print("kNN Root Mean Squared Error (RMSE):", rmse)
-else:
-    print("Error: Required columns are missing in the data.")
-   
-    # Ensure the predicted and actual data align
-if 'FORECAST' in svr_forecast_template.columns and 'POWER' in solution_data.columns:
-    # Calculate RMSE
-    rmse = np.sqrt(mean_squared_error(solution_data['POWER'], svr_forecast_template['FORECAST']))
-    print("SVR Root Mean Squared Error (RMSE):", rmse)
-else:
-    print("Error: Required columns are missing in the data.")
-   
-    # Ensure the predicted and actual data align
-if 'FORECAST' in nn_forecast_template.columns and 'POWER' in solution_data.columns:
-    # Calculate RMSE
-    rmse = np.sqrt(mean_squared_error(solution_data['POWER'], nn_forecast_template['FORECAST']))
-    print("NN Root Mean Squared Error (RMSE):", rmse)
-else:
-    print("Error: Required columns are missing in the data.")
+# Calculate LN_RMSE
+ln_rmse = np.sqrt(mean_squared_error(solution_data['POWER'], ln_forecast_template['FORECAST']))
+print("LN Root Mean Squared Error (RMSE):", ln_rmse)
+# Calculate kNN RMSE
+knn_rmse = np.sqrt(mean_squared_error(solution_data['POWER'], knn_forecast_template['FORECAST']))
+print("kNN Root Mean Squared Error (RMSE):", knn_rmse)
+# Calculate svr_RMSE
+svr_rmse = np.sqrt(mean_squared_error(solution_data['POWER'], svr_forecast_template['FORECAST']))
+print("SVR Root Mean Squared Error (RMSE):", svr_rmse)
+# Calculate NN_RMSE
+nn_rmse = np.sqrt(mean_squared_error(solution_data['POWER'], nn_forecast_template['FORECAST']))
+print("NN Root Mean Squared Error (RMSE):", nn_rmse)
+
+# Plot the POWER value vs FORECAST value for each model
+# Ensure TIMESTAMP is in datetime format
+solution_data['TIMESTAMP'] = pd.to_datetime(solution_data['TIMESTAMP'], format='%Y%m%d %H:%M')
+
+# Generate a range of all days in the month
+all_days = pd.date_range(start=solution_data['TIMESTAMP'].min().date(), 
+                         end=solution_data['TIMESTAMP'].max().date(), freq='D')
+
+# Plot Linear Regression
+plt.figure(figsize=(15, 6))
+plt.plot(solution_data['TIMESTAMP'], solution_data['POWER'], label='Actual POWER', color='blue')
+plt.plot(solution_data['TIMESTAMP'], ln_forecast_template['FORECAST'], label='LR FORECAST', color='red')
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%d'))  # Format x-axis to show day
+plt.gca().xaxis.set_major_locator(mdates.DayLocator())  # Show all days
+plt.xticks(all_days, [day.strftime('%d') for day in all_days], rotation=45)
+plt.xlabel('Day')
+plt.ylabel('Power')
+plt.title('Linear Regression: Actual vs Forecast')
+plt.legend()
+plt.grid()
+plt.tight_layout()
+plt.show()
+
+# Plot KNN
+plt.figure(figsize=(15, 6))
+plt.plot(solution_data['TIMESTAMP'], solution_data['POWER'], label='Actual POWER', color='blue')
+plt.plot(solution_data['TIMESTAMP'], knn_forecast_template['FORECAST'], label='KNN FORECAST', color='green')
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%d'))  # Format x-axis to show day
+plt.gca().xaxis.set_major_locator(mdates.DayLocator())  # Show all days
+plt.xticks(all_days, [day.strftime('%d') for day in all_days], rotation=45)
+plt.xlabel('Day')
+plt.ylabel('Power')
+plt.title('KNN: Actual vs Forecast')
+plt.legend()
+plt.grid()
+plt.tight_layout()
+plt.show()
+
+# Plot SVR
+plt.figure(figsize=(15, 6))
+plt.plot(solution_data['TIMESTAMP'], solution_data['POWER'], label='Actual POWER', color='blue')
+plt.plot(solution_data['TIMESTAMP'], svr_forecast_template['FORECAST'], label='SVR FORECAST', color='orange')
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%d'))  # Format x-axis to show day
+plt.gca().xaxis.set_major_locator(mdates.DayLocator())  # Show all days
+plt.xticks(all_days, [day.strftime('%d') for day in all_days], rotation=45)
+plt.xlabel('Day')
+plt.ylabel('Power')
+plt.title('SVR: Actual vs Forecast')
+plt.legend()
+plt.grid()
+plt.tight_layout()
+plt.show()
+
+# Plot Neural Network
+plt.figure(figsize=(15, 6))
+plt.plot(solution_data['TIMESTAMP'], solution_data['POWER'], label='Actual POWER', color='blue')
+plt.plot(solution_data['TIMESTAMP'], nn_forecast_template['FORECAST'], label='NN FORECAST', color='purple')
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%d'))  # Format x-axis to show day
+plt.gca().xaxis.set_major_locator(mdates.DayLocator())  # Show all days
+plt.xticks(all_days, [day.strftime('%d') for day in all_days], rotation=45)
+plt.xlabel('Day')
+plt.ylabel('Power')
+plt.title('Neural Network: Actual vs Forecast')
+plt.legend()
+plt.grid()
+plt.tight_layout()
+plt.show()
