@@ -204,4 +204,8 @@ Forecasting” for mathematical calculation
 =======
 
 ###### **Ruben Roca eats Ass**
+<<<<<<< HEAD
 >>>>>>> 127a4127e198a4dfcb679490725220d68f51efaf
+=======
+![ChatGPT Image Apr 10, 2025, 01_19_06 PM](https://github.com/user-attachments/assets/3504f1c9-d75c-4b28-9640-bf82a8636657)
+>>>>>>> 77e7a51628de8b8b5ab3f40ccf233164c36d1646
