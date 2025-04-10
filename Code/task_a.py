@@ -43,7 +43,7 @@ svr_pred = svr_model.predict(X_test.values.reshape(-1, 1))
 nn_pred = nn_model.predict(X_test.values.reshape(-1, 1))
 
 # Evaluate all models
-print("Linear Regression - MSE:", mean_squared_error(y_test, lr_pred), "R2:", r2_score(y_test, lr_pred))
+print("LR - MSE:", mean_squared_error(y_test, lr_pred), "R2:", r2_score(y_test, lr_pred))
 print("KNN - MSE:", mean_squared_error(y_test, knn_pred), "R2:", r2_score(y_test, knn_pred))
 print("SVR - MSE:", mean_squared_error(y_test, svr_pred), "R2:", r2_score(y_test, svr_pred))
 print("NN - MSE:", mean_squared_error(y_test, nn_pred), "R2:", r2_score(y_test, nn_pred))
