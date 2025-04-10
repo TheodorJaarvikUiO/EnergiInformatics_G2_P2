@@ -8,7 +8,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 import matplotlib.pyplot as plt
 
 # Load the dataset
-data = pd.read_csv('Data/TrainData.csv')
+data = pd.read_csv('../Data/TrainData.csv')
 
 # Calculate wind direction
 # Wind direction in degrees: 0° is north, 90° is east, 180° is south, 270° is west
@@ -36,8 +36,8 @@ print("Mean Squared Error:", mse)
 print("R-squared:", r2)
 
 # Load the forecasted wind data
-forecast_data = pd.read_csv('Data/WeatherForecastInput.csv')
-forecast_template = pd.read_csv('Data/ForecastTemplate.csv')
+forecast_data = pd.read_csv('../Data/WeatherForecastInput.csv')
+forecast_template = pd.read_csv('../Data/ForecastTemplate.csv')
 
 # Calculate wind direction for the forecasted data
 forecast_data['wind_direction'] = (np.arctan2(forecast_data['V10'], forecast_data['U10']) * (180 / np.pi) + 360) % 360
@@ -49,12 +49,12 @@ forecast_X = forecast_data[['wind_direction', 'WS10']]
 forecast_template['FORECAST'] = model.predict(forecast_X)
 
 # Save the predictions to a new CSV file
-forecast_template.to_csv('Results/ForecastTemplate2.csv', index=False)
+forecast_template.to_csv('../Results/ForecastTemplate2.csv', index=False)
 
 print("Predictions saved to 'Results/ForecastTemplate2.csv'")
 
 # Load the actual values from Solution.csv
-solution_data = pd.read_csv('Data/Solution.csv')
+solution_data = pd.read_csv('../Data/Solution.csv')
 
 # Calculate RMSE
 rmse = np.sqrt(mean_squared_error(solution_data['POWER'], forecast_template['FORECAST']))
@@ -72,7 +72,7 @@ lr_model = LinearRegression()
 lr_model.fit(X_train_lr.values.reshape(-1, 1), y_train_lr)
 
 forecast_X_lr = forecast_data['WS10']
-forecast_template_lr = pd.read_csv('Data/ForecastTemplate.csv')
+forecast_template_lr = pd.read_csv('../Data/ForecastTemplate.csv')
 # Predict the power output using the trained model
 forecast_template_lr['FORECAST'] = lr_model.predict(forecast_X_lr.values.reshape(-1, 1))
 

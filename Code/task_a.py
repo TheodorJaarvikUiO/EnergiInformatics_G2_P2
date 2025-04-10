@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
 # Load the dataset
-data = pd.read_csv('Data/TrainData.csv')
+data = pd.read_csv('../Data/TrainData.csv')
 
 # Separate the features (X) and the target variable (y)
 X = data['WS10']  # Use WS10 as input features
@@ -50,30 +50,30 @@ print("SVR - MSE:", mean_squared_error(y_test, svr_pred), "R2:", r2_score(y_test
 print("NN - MSE:", mean_squared_error(y_test, nn_pred), "R2:", r2_score(y_test, nn_pred))
 
 # Load the forecasted wind data
-forecast_data = pd.read_csv('Data/WeatherForecastInput.csv')
-ln_forecast_template = pd.read_csv('Data/ForecastTemplate.csv')
-knn_forecast_template = pd.read_csv('Data/ForecastTemplate.csv')
-svr_forecast_template = pd.read_csv('Data/ForecastTemplate.csv')
-nn_forecast_template = pd.read_csv('Data/ForecastTemplate.csv')
+forecast_data = pd.read_csv('../Data/WeatherForecastInput.csv')
+ln_forecast_template = pd.read_csv('../Data/ForecastTemplate.csv')
+knn_forecast_template = pd.read_csv('../Data/ForecastTemplate.csv')
+svr_forecast_template = pd.read_csv('../Data/ForecastTemplate.csv')
+nn_forecast_template = pd.read_csv('../Data/ForecastTemplate.csv')
 
 # Prepare the input features for prediction
 forecast_X = forecast_data['WS10']
 
 # Predict the power output using the trained model
 ln_forecast_template['FORECAST'] = lr_model.predict(forecast_X.values.reshape(-1, 1))
-ln_forecast_template.to_csv('Results/ForecastTemplate1-LR.csv', index=False)
+ln_forecast_template.to_csv('../Results/ForecastTemplate1-LR.csv', index=False)
 # Predict the power output using the trained model
 knn_forecast_template['FORECAST'] = knn_model.predict(forecast_X.values.reshape(-1, 1))
-knn_forecast_template.to_csv('Results/ForecastTemplate1-kNN.csv', index=False)
+knn_forecast_template.to_csv('../Results/ForecastTemplate1-kNN.csv', index=False)
 # Predict the power output using the trained model
 svr_forecast_template['FORECAST'] = svr_model.predict(forecast_X.values.reshape(-1, 1))
-svr_forecast_template.to_csv('Results/ForecastTemplate1-SVR.csv', index=False)
+svr_forecast_template.to_csv('../Results/ForecastTemplate1-SVR.csv', index=False)
 # Predict the power output using the trained model
 nn_forecast_template['FORECAST'] = nn_model.predict(forecast_X.values.reshape(-1, 1))
-nn_forecast_template.to_csv('Results/ForecastTemplate1-NN.csv', index=False)
+nn_forecast_template.to_csv('../Results/ForecastTemplate1-NN.csv', index=False)
 
 # Load the actual values from Solution.csv
-solution_data = pd.read_csv('Data/Solution.csv')
+solution_data = pd.read_csv('../Data/Solution.csv')
 
 # Calculate LN_RMSE
 ln_rmse = np.sqrt(mean_squared_error(solution_data['POWER'], ln_forecast_template['FORECAST']))
