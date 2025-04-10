@@ -60,16 +60,16 @@ forecast_X = forecast_data['WS10']
 
 # Predict the power output using the trained model
 ln_forecast_template['FORECAST'] = lr_model.predict(forecast_X.values.reshape(-1, 1))
-ln_forecast_template['FORECAST'].to_csv('Results/ForecastTemplate1-LR.csv', index=False)
+ln_forecast_template.to_csv('Results/ForecastTemplate1-LR.csv', index=False)
 # Predict the power output using the trained model
 knn_forecast_template['FORECAST'] = knn_model.predict(forecast_X.values.reshape(-1, 1))
-knn_forecast_template['FORECAST'].to_csv('Results/ForecastTemplate1-kNN.csv', index=False)
+knn_forecast_template.to_csv('Results/ForecastTemplate1-kNN.csv', index=False)
 # Predict the power output using the trained model
 svr_forecast_template['FORECAST'] = svr_model.predict(forecast_X.values.reshape(-1, 1))
-svr_forecast_template['FORECAST'].to_csv('Results/ForecastTemplate1-SVR.csv', index=False)
+svr_forecast_template.to_csv('Results/ForecastTemplate1-SVR.csv', index=False)
 # Predict the power output using the trained model
 nn_forecast_template['FORECAST'] = nn_model.predict(forecast_X.values.reshape(-1, 1))
-nn_forecast_template['FORECAST'].to_csv('Results/ForecastTemplate1-NN.csv', index=False)
+nn_forecast_template.to_csv('Results/ForecastTemplate1-NN.csv', index=False)
 
 # Load the actual values from Solution.csv
 solution_data = pd.read_csv('Data/Solution.csv')
