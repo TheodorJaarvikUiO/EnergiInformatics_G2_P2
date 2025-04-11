@@ -1,0 +1,1 @@
+import numpy as npnp.random.seed(42)initial_weights = np.random.rand(6)
