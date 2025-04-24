@@ -27,7 +27,7 @@ lr_model = LinearRegression()
 lr_model.fit(X_train.values.reshape(-1, 1), y_train)
 
 # Train a KNN model
-knn_model = KNeighborsRegressor(n_jobs=-1)
+knn_model = KNeighborsRegressor(n_jobs=-1, n_neighbors=549)
 
 # Perform grid search for KNN model
 knn_param_grid = {'n_neighbors': [547, 548, 549, 550, 551]}
