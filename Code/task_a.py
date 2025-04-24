@@ -10,6 +10,7 @@ from sklearn.svm import SVR
 from sklearn.neural_network import MLPRegressor
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from sklearn.model_selection import GridSearchCV
 
 # Load the dataset
 data = pd.read_csv('Data/TrainData.csv')
@@ -26,7 +27,15 @@ lr_model = LinearRegression()
 lr_model.fit(X_train.values.reshape(-1, 1), y_train)
 
 # Train a KNN model
-knn_model = KNeighborsRegressor(n_neighbors=5)
+knn_model = KNeighborsRegressor(n_jobs=-1)
+
+# Perform grid search for KNN model
+knn_param_grid = {'n_neighbors': [547, 548, 549, 550, 551]}
+knn_grid = GridSearchCV(knn_model, knn_param_grid)
+
+knn_grid.fit(X_train.values.reshape(-1, 1), y_train)
+print(knn_grid.best_params_)
+
 knn_model.fit(X_train.values.reshape(-1, 1), y_train)
 
 # Train an SVR model
