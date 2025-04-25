@@ -40,7 +40,7 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random
 
 x_predict = wind_input_data_df[['WS10']]
 '''
-#---------------- k-NN ctross-validation --------------------------------------------------
+#---------------- k-NN cross-validation --------------------------------------------------
 # establish the range 
 param_knn = {'n_neighbors': range(5, 1000)}
 knn = KNeighborsRegressor()
