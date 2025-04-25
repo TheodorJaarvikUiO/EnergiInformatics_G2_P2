@@ -1,7 +1,9 @@
+
+
 from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.linear_model import LinearRegression
-from sklearn.neighbors import KNeighborsRegressor
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVR
 from sklearn.neural_network import MLPRegressor
 
@@ -37,12 +39,28 @@ y = wind_training_data_df[['POWER']] # dependent variable
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42)
 
 x_predict = wind_input_data_df[['WS10']]
-
+'''
+#---------------- k-NN ctross-validation --------------------------------------------------
+# establish the range 
+param_knn = {'n_neighbors': range(5, 1000)}
+knn = KNeighborsRegressor()
+# Set up GridSearchCV for cross-validation, performs k-fold cross-validation for each value in param_grid
+# and evaluates the model using the specified scoring metric.
+grid_search = GridSearchCV(knn, param_knn, cv=5, scoring='neg_mean_squared_error')
+# Fit GridSearchCV to the training data
+grid_search.fit(x_train, y_train)
+# Examine the results of the cross-validation
+best_k = grid_search.best_params_
+cross_validation = grid_search.best_score_
+# performance for all tested 'k' values
+k_results_df = pd.DataFrame(grid_search.cv_results_)
+#-------------------------------------------------------------------------------------------
+'''
 # create and train the models using the training datasets
 LR_model = LinearRegression()
 LR_model.fit(x_train, y_train)
 
-kNN_model =  KNeighborsRegressor(n_neighbors= 250)
+kNN_model =  KNeighborsRegressor(n_neighbors= 586)
 kNN_model.fit(x_train, y_train)
 
 SVR_model = SVR(kernel='rbf', C=1, gamma='scale', epsilon=0.1)
