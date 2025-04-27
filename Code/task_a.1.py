@@ -1,5 +1,3 @@
-
-
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.linear_model import LinearRegression
@@ -40,13 +38,17 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random
 
 x_predict = wind_input_data_df[['WS10']]
 '''
-#---------------- k-NN cross-validation --------------------------------------------------
-# establish the range 
+#---------------- k-NN ctross-validation --------------------------------------------------
+# establish the parameter 
 param_knn = {'n_neighbors': range(5, 1000)}
 knn = KNeighborsRegressor()
 # Set up GridSearchCV for cross-validation, performs k-fold cross-validation for each value in param_grid
 # and evaluates the model using the specified scoring metric.
-grid_search = GridSearchCV(knn, param_knn, cv=5, scoring='neg_mean_squared_error')
+grid_search = GridSearchCV(knn,                              # The model to tune (knn in this case)
+                           param_knn,                        # dictionary with the hyperparameter
+                           cv= 5,                            # number of cross-validation folds
+                           scoring= 'neg_mean_squared_error' # metric to evaluate the model's performance
+                           )
 # Fit GridSearchCV to the training data
 grid_search.fit(x_train, y_train)
 # Examine the results of the cross-validation
@@ -54,6 +56,28 @@ best_k = grid_search.best_params_
 cross_validation = grid_search.best_score_
 # performance for all tested 'k' values
 k_results_df = pd.DataFrame(grid_search.cv_results_)
+'''
+'''
+#---------------- SVR ctross-validation ----------------------------------------------------
+# establish the parameters
+param_svr = {
+    'C': [1, 10, 100],
+    'kernel': ['linear', 'poly', 'rbf'],
+    'epsilon': [0.01, 0.1, 0.2],
+    'gamma': ['scale', 'auto']
+    }
+svr = SVR()
+# Set up GridSearchCV for Cross-Validation 
+grid_search = GridSearchCV(svr,                               # The model to tune (SVR in this case)
+                           param_grid= param_svr,             # dictionary of hyperparameters
+                           cv= 5,                             # number of cross-validation folds
+                           scoring= 'neg_mean_squared_error', # metric to evaluate the model's performance
+                           verbose= 2,                        # verbosity of the output during training
+                           n_jobs= -1                         # CPU cores to use (-1 uses all available cores)
+                           )
+grid_search.fit(x_train, y_train)
+best_params = grid_search.best_params_
+best_svr = grid_search.best_estimator_
 #-------------------------------------------------------------------------------------------
 '''
 # create and train the models using the training datasets
@@ -185,3 +209,26 @@ plt.xticks(rotation=45, ha='right')
 plt.xlim(wind_solution_df.index.min(), wind_solution_df.index.max())
 plt.tight_layout()
 plt.show()
+
+
+#--------------------------------- SVR Model ----------------------------------------------------------
+# C--> Regularization parameter: Controls the trade-off between achieving a low training error and having a "smoother" model that generalizes well to unseen data
+           # Low C emphasizes a simpler, smoother model. It might tolerate more training errors. This can help prevent overfitting if your training data is noisy or if you want the model to generalize better.
+           # High C tries to fit the training data more closely, aiming for a lower training error. This can lead to a more complex model that might overfit the training data, especially if it's noisy.
+# gamma --> Kernel coefficient for 'rbf', 'poly', and 'sigmoid'
+           # Influences the "reach" of a single training example
+           # Low gamma: A larger radius of influence. Faraway points are considered when making predictions, leading to a smoother decision boundary.
+           # High gamma: A smaller radius of influence. Only points close to the prediction point have a significant effect. This can lead to a more complex and potentially wiggly decision boundary that might overfit the training data.
+           # gamma='scale' (default): Uses 1/(n_features*X.var()).
+           # gamma='auto': Uses 1/n_features.
+# ϵ-tube
+           # Defines a margin of tolerance where no penalty is given for errors within this range
+           # Small epsilon: The model aims to fit the training data with very little error. This can lead to a more complex model and potentially overfitting.
+           # Large epsilon: The model is more tolerant of errors. This can result in a simpler model and might improve generalization, especially if the data has some inherent noise.
+
+#--------------------------------- ANN Model ----------------------------------------------------------
+# Two hidden layers with 100 and 50 neurons
+# activation --> Rectified Linear Unit activation
+# solver --> Adam optimization algorithm
+# max_iter --> Maximum number of iterations
+# random_state --> For reproducibility
