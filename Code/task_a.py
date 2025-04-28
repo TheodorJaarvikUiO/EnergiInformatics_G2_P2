@@ -55,13 +55,16 @@ knn_random_search.fit(X_train, y_train)
 print("(KNN) Best parameters found:", knn_random_search.best_params_)
 
 # Train an SVR model
-svr_model = SVR(kernel='linear')
+svr_model = SVR(kernel='poly')
 
 # Perform grid search for SVR model
 # Define the hyperparameter space
 svr_param_distributions = {
-    'C': loguniform(1e-2, 1e3),            # Regularization parameter
-    'epsilon': uniform(0, 0.5)             # Epsilon in the epsilon-SVR model
+    'C': loguniform(1e-2, 1e3),
+    'epsilon': uniform(0, 0.5),
+    #'kernel': ['rbf', 'poly'],
+    'gamma': ['scale', 'auto', loguniform(1e-4, 1e-1)],  # important for both
+    'degree': [2, 3, 4, 5]  # only used if kernel='poly'            
 }
 
 # Set up RandomizedSearchCV
