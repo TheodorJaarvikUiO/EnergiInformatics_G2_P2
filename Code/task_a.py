@@ -11,6 +11,8 @@ from sklearn.neural_network import MLPRegressor
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
+from scipy.stats import uniform, loguniform
 
 # Load the dataset
 data = pd.read_csv('Data/TrainData.csv')
@@ -21,36 +23,95 @@ y = data['POWER']  # Use POWER as the target variable
 
 # Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+X_train = X_train.values.reshape(-1, 1)
+X_test = X_test.values.reshape(-1, 1)
 
 # Create and train the linear regression model
 lr_model = LinearRegression()
-lr_model.fit(X_train.values.reshape(-1, 1), y_train)
+lr_model.fit(X_train, y_train)
 
 # Train a KNN model
-knn_model = KNeighborsRegressor(n_jobs=-1, n_neighbors=549)
+knn_model = KNeighborsRegressor()
 
-# Perform grid search for KNN model
-knn_param_grid = {'n_neighbors': [547, 548, 549, 550, 551]}
-knn_grid = GridSearchCV(knn_model, knn_param_grid)
+knn_param_distributions = {
+    'n_neighbors': range(2,1000),  # Number of neighbors to use
+    'weights': ['uniform', 'distance'],
+    'p': [1, 2]  # 1 = Manhattan distance, 2 = Euclidean distance
+}
 
-knn_grid.fit(X_train.values.reshape(-1, 1), y_train)
-print(knn_grid.best_params_)
+knn_random_search = RandomizedSearchCV(
+    estimator=knn_model,                  # use svr, ridge, knn, or mlp
+    param_distributions=knn_param_distributions,        # the corresponding params
+    n_iter=50,
+    scoring='neg_mean_squared_error',
+    cv=5,
+    verbose=2,
+    random_state=42,
+    n_jobs=-1
+)
 
-knn_model.fit(X_train.values.reshape(-1, 1), y_train)
+knn_random_search.fit(X_train, y_train)
+# Best parameters
+print("(KNN) Best parameters found:", knn_random_search.best_params_)
 
 # Train an SVR model
-svr_model = SVR(kernel='rbf', C=100, gamma=0.1, epsilon=0.1)
-svr_model.fit(X_train.values.reshape(-1, 1), y_train)
+svr_model = SVR(kernel='linear')
+
+# Perform grid search for SVR model
+# Define the hyperparameter space
+svr_param_distributions = {
+    'C': loguniform(1e-2, 1e3),            # Regularization parameter
+    'epsilon': uniform(0, 0.5)             # Epsilon in the epsilon-SVR model
+}
+
+# Set up RandomizedSearchCV
+svr_random_search = RandomizedSearchCV(
+    estimator=svr_model,
+    param_distributions=svr_param_distributions,
+    n_iter=50,                # Number of parameter combinations to try
+    scoring='neg_mean_squared_error',
+    cv=5,                     # 5-fold cross-validation
+    verbose=2,
+    random_state=42,
+    n_jobs=-1
+)
+
+# Fit on your training data
+svr_random_search.fit(X_train, y_train)
+
+# Best parameters
+print("(SVR) Best parameters found:", svr_random_search.best_params_)
 
 # Train an NN model
-nn_model = MLPRegressor(hidden_layer_sizes=(100,), activation='relu', solver='adam', max_iter=500, random_state=42)
-nn_model.fit(X_train.values.reshape(-1, 1), y_train)
+nn_model = MLPRegressor(activation='relu', max_iter=5000)
+
+nn_param_distributions = {
+    'hidden_layer_sizes': [(50,), (100,), (50, 50), (100, 50), (100, 100)],
+    'solver': ['adam', 'lbfgs'],
+    'alpha': loguniform(1e-5, 1e-2),  # regularization
+    'learning_rate': ['constant', 'adaptive']
+}
+
+nn_random_search = RandomizedSearchCV(
+    estimator=nn_model,                  # use svr, ridge, knn, or mlp
+    param_distributions=nn_param_distributions,        # the corresponding params
+    n_iter=50,
+    scoring='neg_mean_squared_error',
+    cv=5,
+    verbose=2,
+    random_state=42,
+    n_jobs=-1
+)
+
+nn_random_search.fit(X_train, y_train)
+# Best parameters
+print("(NN) Best parameters found:", nn_random_search.best_params_)
 
 # Make predictions for all models
-lr_pred = lr_model.predict(X_test.values.reshape(-1, 1))
-knn_pred = knn_model.predict(X_test.values.reshape(-1, 1))
-svr_pred = svr_model.predict(X_test.values.reshape(-1, 1))
-nn_pred = nn_model.predict(X_test.values.reshape(-1, 1))
+lr_pred = lr_model.predict(X_test)
+knn_pred = knn_random_search.predict(X_test)
+svr_pred = svr_random_search.predict(X_test)
+nn_pred = nn_random_search.predict(X_test)
 
 # Evaluate all models
 print("LR - MSE:", mean_squared_error(y_test, lr_pred), "R2:", r2_score(y_test, lr_pred))
@@ -66,19 +127,19 @@ svr_forecast_template = pd.read_csv('Data/ForecastTemplate.csv')
 nn_forecast_template = pd.read_csv('Data/ForecastTemplate.csv')
 
 # Prepare the input features for prediction
-forecast_X = forecast_data['WS10']
+forecast_X = forecast_data['WS10'].values.reshape(-1, 1)
 
 # Predict the power output using the trained model
-ln_forecast_template['FORECAST'] = lr_model.predict(forecast_X.values.reshape(-1, 1))
+ln_forecast_template['FORECAST'] = lr_model.predict(forecast_X)
 ln_forecast_template.to_csv('Results/ForecastTemplate1-LR.csv', index=False)
 # Predict the power output using the trained model
-knn_forecast_template['FORECAST'] = knn_model.predict(forecast_X.values.reshape(-1, 1))
+knn_forecast_template['FORECAST'] = knn_random_search.predict(forecast_X)
 knn_forecast_template.to_csv('Results/ForecastTemplate1-kNN.csv', index=False)
 # Predict the power output using the trained model
-svr_forecast_template['FORECAST'] = svr_model.predict(forecast_X.values.reshape(-1, 1))
+svr_forecast_template['FORECAST'] = svr_random_search.predict(forecast_X)
 svr_forecast_template.to_csv('Results/ForecastTemplate1-SVR.csv', index=False)
 # Predict the power output using the trained model
-nn_forecast_template['FORECAST'] = nn_model.predict(forecast_X.values.reshape(-1, 1))
+nn_forecast_template['FORECAST'] = nn_random_search.predict(forecast_X)
 nn_forecast_template.to_csv('Results/ForecastTemplate1-NN.csv', index=False)
 
 # Load the actual values from Solution.csv
