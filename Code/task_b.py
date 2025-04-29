@@ -14,13 +14,24 @@ data = pd.read_csv('Data/TrainData.csv')
 # Wind direction in degrees: 0° is north, 90° is east, 180° is south, 270° is west
 data['wind_direction'] = (np.arctan2(data['V10'], data['U10']) * (180 / np.pi) + 360) % 360
 
-# X_train and y_train are the input features and target variable respectively
-X_train = data[['wind_direction', 'WS10']]  # Use wind_direction and WS10 as input features
-y_train = data['POWER']  # Use POWER as the target variable
+# Separate the features (X) and the target variable (y)
+X = data[['wind_direction', 'WS10']]  # Use wind_direction and WS10 as input features
+y = data['POWER']  # Use POWER as the target variable
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
 
 # Create and train the model
 model = LinearRegression()
 model.fit(X_train, y_train)
+
+# Make predictions
+y_pred = model.predict(X_test)
+# Calculate RMSE for the test set
+rmse_test = np.sqrt(mean_squared_error(y_test, y_pred))
+print("Multiple LR RMSE on Test Set:", rmse_test)
+r2 = r2_score(y_test, y_pred)
+print("Multiple LR R2 on Test Set:", r2)
 
 # Load the forecasted wind data
 forecast_data = pd.read_csv('Data/WeatherForecastInput.csv')
@@ -38,37 +49,40 @@ forecast_template['FORECAST'] = model.predict(forecast_X)
 # Save the predictions to a new CSV file
 forecast_template.to_csv('Results/ForecastTemplate2.csv', index=False)
 
-print("Predictions saved to 'Results/ForecastTemplate2.csv'")
-
 # Load the actual values from Solution.csv
 solution_data = pd.read_csv('Data/Solution.csv')
 
-# Evaluate the model
+# Calculate RMSE
 rmse = np.sqrt(mean_squared_error(solution_data['POWER'], forecast_template['FORECAST']))
-r2 = r2_score(solution_data['POWER'], forecast_template['FORECAST'])
-
-print("Multiple LR RMSE:", rmse)
-print("Multiple LR R-squared:", r2)
+print("Forecast Multiple LR RMSE:", rmse)
 
 ### SIMPLE LINEAR REGRESSION ###
-X_train_lr = data['WS10']
-y_train_lr = data['POWER']
+X_lr = data['WS10']
+y_lr = data['POWER']
+
+# Split the data into training and testing sets
+X_train_lr, X_test_lr, y_train_lr, y_test_lr = train_test_split(X_lr, y_lr, test_size=0.25, random_state=42)
 
 # Create and train the linear regression model
-lr_model = LinearRegression()
-lr_model.fit(X_train_lr.values.reshape(-1, 1), y_train_lr)
+simple_model = LinearRegression()
+simple_model.fit(X_train_lr.values.reshape(-1, 1), y_train_lr)
+
+# Make predictions
+y_pred_lr = simple_model.predict(X_test_lr.values.reshape(-1, 1))
+# Calculate RMSE for the test set
+simple_rmse_test = np.sqrt(mean_squared_error(y_test_lr, y_pred_lr))
+print("Simple LR RMSE on Test Set:", simple_rmse_test)
+simple_r2 = r2_score(y_test_lr, y_pred_lr)
+print("Simple LR R2 on Test Set:", simple_r2)
 
 forecast_X_lr = forecast_data['WS10']
 forecast_template_lr = pd.read_csv('Data/ForecastTemplate.csv')
 # Predict the power output using the trained model
-forecast_template_lr['FORECAST'] = lr_model.predict(forecast_X_lr.values.reshape(-1, 1))
+forecast_template_lr['FORECAST'] = simple_model.predict(forecast_X_lr.values.reshape(-1, 1))
 
-# Evaluate the model
-lr_rmse = np.sqrt(mean_squared_error(solution_data['POWER'], forecast_template_lr['FORECAST']))
-lr_r2 = r2_score(solution_data['POWER'], forecast_template_lr['FORECAST'])
-
-print("SIMPLE LR RMSE:", lr_rmse)
-print("SIMPLE LR R-squared:", lr_r2)
+# Calculate RMSE
+simple_rmse = np.sqrt(mean_squared_error(solution_data['POWER'], forecast_template_lr['FORECAST']))
+print("Forecast Simple LR RMSE:", simple_rmse)
 
 # Convert TIMESTAMP to datetime for proper plotting
 solution_data['TIMESTAMP'] = pd.to_datetime(solution_data['TIMESTAMP'], format='%Y%m%d %H:%M')
@@ -84,7 +98,7 @@ plt.plot(solution_data['TIMESTAMP'], forecast_template_lr['FORECAST'], label='Fo
 plt.xticks(all_days, [day.strftime('%d') for day in all_days], rotation=45)
 
 # Add labels, legend, and title
-plt.xlabel('Date')
+plt.xlabel('Day of November 2013')
 plt.ylabel('Power')
 plt.title('Power Comparison: Actual vs Forecasted')
 plt.legend()

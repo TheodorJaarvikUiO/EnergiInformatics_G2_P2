@@ -1,5 +1,5 @@
 # Task A: Wind Power Prediction using Multiple Models
-
+import warnings
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -12,6 +12,9 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from sklearn.model_selection import RandomizedSearchCV
 from scipy.stats import uniform, loguniform
+
+# Suppress all warnings (general)
+warnings.filterwarnings('ignore')
 
 # Load the dataset
 data = pd.read_csv('Data/TrainData.csv')
@@ -33,7 +36,7 @@ lr_model.fit(X_train, y_train)
 knn_model = KNeighborsRegressor()
 
 knn_param_distributions = {
-    'n_neighbors': range(2,1000),  # Number of neighbors to use
+    'n_neighbors': range(1,1001),  # Number of neighbors to use
     'weights': ['uniform', 'distance'],
     'p': [1, 2]  # 1 = Manhattan distance, 2 = Euclidean distance
 }
@@ -86,10 +89,12 @@ print("(SVR) Best parameters found:", svr_random_search.best_params_)
 nn_model = MLPRegressor(activation='relu', max_iter=5000)
 
 nn_param_distributions = {
-    'hidden_layer_sizes': [(50,), (100,), (50, 50), (100, 50), (100, 100)],
+    'hidden_layer_sizes': [(100,), (150,), (100, 50), (150, 100), (200,)],
     'solver': ['adam', 'lbfgs'],
     'alpha': loguniform(1e-5, 1e-2),  # regularization
-    'learning_rate': ['constant', 'adaptive']
+    'learning_rate': ['constant', 'adaptive'],
+    'learning_rate_init': loguniform(1e-4, 1e-2),
+    'early_stopping': [True]
 }
 
 nn_random_search = RandomizedSearchCV(
@@ -113,11 +118,39 @@ knn_pred = knn_random_search.predict(X_test)
 svr_pred = svr_random_search.predict(X_test)
 nn_pred = nn_random_search.predict(X_test)
 
+#Benchmarking
+lr = LinearRegression()
+lr.fit(X_train, y_train)
+lr_bench = lr.predict(X_test)
+
+knn = KNeighborsRegressor()
+knn.fit(X_train, y_train)
+knn_bench = knn.predict(X_test)
+
+svr = SVR()
+svr.fit(X_train, y_train)
+svr_bench = svr.predict(X_test)
+
+nn = MLPRegressor()
+nn.fit(X_train, y_train)
+nn_bench = nn.predict(X_test)
+
+print('################################################################')
+print('Model Evaluation')
+print('################################################################')
 # Evaluate all models
-print("LR - MSE:", mean_squared_error(y_test, lr_pred), "R2:", r2_score(y_test, lr_pred))
-print("KNN - MSE:", mean_squared_error(y_test, knn_pred), "R2:", r2_score(y_test, knn_pred))
-print("SVR - MSE:", mean_squared_error(y_test, svr_pred), "R2:", r2_score(y_test, svr_pred))
-print("NN - MSE:", mean_squared_error(y_test, nn_pred), "R2:", r2_score(y_test, nn_pred))
+print("LR - RMSE:", np.sqrt(mean_squared_error(y_test, lr_pred)), "R2:", r2_score(y_test, lr_pred))
+print("KNN - RMSE:", np.sqrt(mean_squared_error(y_test, knn_pred)), "R2:", r2_score(y_test, knn_pred))
+print("SVR - RMSE:", np.sqrt(mean_squared_error(y_test, svr_pred)), "R2:", r2_score(y_test, svr_pred))
+print("NN - RMSE:", np.sqrt(mean_squared_error(y_test, nn_pred)), "R2:", r2_score(y_test, nn_pred))
+print("LR Benchmark - RMSE:", np.sqrt(mean_squared_error(y_test, lr_bench)), "R2:", r2_score(y_test, lr_bench))
+print("KNN Benchmark - RMSE:", np.sqrt(mean_squared_error(y_test, knn_bench)), "R2:", r2_score(y_test, knn_bench))
+print("SVR Benchmark - RMSE:", np.sqrt(mean_squared_error(y_test, svr_bench)), "R2:", r2_score(y_test, svr_bench))
+print("NN Benchmark - RMSE:", np.sqrt(mean_squared_error(y_test, nn_bench)), "R2:", r2_score(y_test, nn_bench))
+
+print('################################################################')
+print('Forecasting')
+print('################################################################')
 
 # Load the forecasted wind data
 forecast_data = pd.read_csv('Data/WeatherForecastInput.csv')
