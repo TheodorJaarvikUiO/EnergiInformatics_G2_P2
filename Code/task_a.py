@@ -1,5 +1,5 @@
 # Task A: Wind Power Prediction using Multiple Models
-# Import necessary libraries
+
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -10,7 +10,6 @@ from sklearn.svm import SVR
 from sklearn.neural_network import MLPRegressor
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import RandomizedSearchCV
 from scipy.stats import uniform, loguniform
 
@@ -45,7 +44,7 @@ knn_random_search = RandomizedSearchCV(
     n_iter=50,
     scoring='neg_mean_squared_error',
     cv=5,
-    verbose=2,
+    verbose=1,
     random_state=42,
     n_jobs=-1
 )
@@ -55,16 +54,14 @@ knn_random_search.fit(X_train, y_train)
 print("(KNN) Best parameters found:", knn_random_search.best_params_)
 
 # Train an SVR model
-svr_model = SVR(kernel='poly')
+svr_model = SVR(kernel='rbf')
 
 # Perform grid search for SVR model
 # Define the hyperparameter space
 svr_param_distributions = {
-    'C': loguniform(1e-2, 1e3),
-    'epsilon': uniform(0, 0.5),
-    #'kernel': ['rbf', 'poly'],
-    'gamma': ['scale', 'auto', loguniform(1e-4, 1e-1)],  # important for both
-    'degree': [2, 3, 4, 5]  # only used if kernel='poly'            
+    'C': loguniform(1e-2, 1e3),        # Regularization: from 0.01 to 1000
+    'epsilon': uniform(0, 0.5),        # Epsilon margin: from 0 to 0.5
+    'gamma': ['scale', 'auto', loguniform(1e-4, 1e-1)]  # Kernel coefficient        
 }
 
 # Set up RandomizedSearchCV
@@ -74,7 +71,7 @@ svr_random_search = RandomizedSearchCV(
     n_iter=50,                # Number of parameter combinations to try
     scoring='neg_mean_squared_error',
     cv=5,                     # 5-fold cross-validation
-    verbose=2,
+    verbose=1,
     random_state=42,
     n_jobs=-1
 )
@@ -101,7 +98,7 @@ nn_random_search = RandomizedSearchCV(
     n_iter=50,
     scoring='neg_mean_squared_error',
     cv=5,
-    verbose=2,
+    verbose=1,
     random_state=42,
     n_jobs=-1
 )
