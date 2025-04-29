@@ -88,6 +88,7 @@ plt.plot(solution_data['TIMESTAMP'], solution_data['POWER'], label='Actual Power
 plt.plot(solution_data['TIMESTAMP'], forecast_template['FORECAST'], label='Forecasted Power (Model)', color='orange')
 plt.plot(solution_data['TIMESTAMP'], forecast_template_lr['FORECAST'], label='Forecasted Power (Model_LR)', color='green')
 plt.xticks(all_days, [day.strftime('%d') for day in all_days], rotation=45)
+
 # Add labels, legend, and title
 plt.xlabel('Date')
 plt.ylabel('Power')
@@ -98,9 +99,3 @@ plt.tight_layout()
 
 # Show the plot
 plt.show()
-
-
-
-
-
-
