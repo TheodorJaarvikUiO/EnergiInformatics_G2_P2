@@ -1,9 +1,11 @@
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.model_selection import RandomizedSearchCV
 from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVR
 from sklearn.neural_network import MLPRegressor
+from scipy.stats import uniform, loguniform
 
 import numpy as np
 import pandas as pd
@@ -38,7 +40,7 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random
 
 x_predict = wind_input_data_df[['WS10']]
 '''
-#---------------- k-NN ctross-validation --------------------------------------------------
+#---------------- k-NN cross-validation --------------------------------------------------
 # establish the parameter 
 param_knn = {'n_neighbors': range(5, 1000)}
 knn = KNeighborsRegressor()
@@ -58,11 +60,11 @@ cross_validation = grid_search.best_score_
 k_results_df = pd.DataFrame(grid_search.cv_results_)
 '''
 '''
-#---------------- SVR ctross-validation ----------------------------------------------------
+#---------------- SVR cross-validation ----------------------------------------------------
 # establish the parameters
 param_svr = {
     'C': [1, 10, 100],
-    'kernel': ['linear', 'poly', 'rbf'],
+    'kernel': ['linear', 'rbf'],
     'epsilon': [0.01, 0.1, 0.2],
     'gamma': ['scale', 'auto']
     }
@@ -70,14 +72,37 @@ svr = SVR()
 # Set up GridSearchCV for Cross-Validation 
 grid_search = GridSearchCV(svr,                               # The model to tune (SVR in this case)
                            param_grid= param_svr,             # dictionary of hyperparameters
-                           cv= 5,                             # number of cross-validation folds
+                           cv= 3,                             # number of cross-validation folds
                            scoring= 'neg_mean_squared_error', # metric to evaluate the model's performance
                            verbose= 2,                        # verbosity of the output during training
                            n_jobs= -1                         # CPU cores to use (-1 uses all available cores)
                            )
-grid_search.fit(x_train, y_train)
+grid_search.fit(x_train, y_train['POWER'])
 best_params = grid_search.best_params_
-best_svr = grid_search.best_estimator_
+'''
+'''
+#---------------- ANN cross-validation ----------------------------------------------------
+nn_param_distributions = {
+    'hidden_layer_sizes': [(50,), (100,), (200,), (50, 50), (100, 50), (100, 100)],
+    'solver': ['adam', 'lbfgs'],
+    'alpha': loguniform(1e-5, 1e-2),  # regularization
+    'learning_rate': ['constant', 'adaptive']
+    }
+
+nn_model = MLPRegressor(activation='relu', max_iter=5000)
+
+nn_random_search = RandomizedSearchCV(
+    estimator= nn_model,                  
+    param_distributions= nn_param_distributions,        
+    n_iter= 50,
+    scoring='neg_mean_squared_error',
+    cv= 5,
+    verbose= 1,
+    random_state= 42,
+    n_jobs= -1
+)
+nn_random_search.fit(x_train, y_train['POWER'])
+best_nn_params = nn_random_search.best_params_
 #-------------------------------------------------------------------------------------------
 '''
 # create and train the models using the training datasets
