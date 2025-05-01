@@ -106,6 +106,7 @@ best_nn_params = nn_random_search.best_params_
 #-------------------------------------------------------------------------------------------
 '''
 # create and train the models using the training datasets
+# and the most optimal hyperparameters obtained through cross-validation
 LR_model = LinearRegression()
 LR_model.fit(x_train, y_train)
 
