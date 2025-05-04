@@ -27,13 +27,11 @@ model.fit(X_train, y_train)
 
 # Make predictions
 y_pred = model.predict(X_test)
-
-# Evaluate the model
-mse = mean_squared_error(y_test, y_pred)
+# Calculate RMSE for the test set
+rmse_test = np.sqrt(mean_squared_error(y_test, y_pred))
+print("Multiple LR RMSE on Test Set:", rmse_test)
 r2 = r2_score(y_test, y_pred)
-
-print("Mean Squared Error:", mse)
-print("R-squared:", r2)
+print("Multiple LR R2 on Test Set:", r2)
 
 # Load the forecasted wind data
 forecast_data = pd.read_csv('Data/WeatherForecastInput.csv')
@@ -51,14 +49,12 @@ forecast_template['FORECAST'] = model.predict(forecast_X)
 # Save the predictions to a new CSV file
 forecast_template.to_csv('Results/ForecastTemplate2.csv', index=False)
 
-print("Predictions saved to 'Results/ForecastTemplate2.csv'")
-
 # Load the actual values from Solution.csv
 solution_data = pd.read_csv('Data/Solution.csv')
 
 # Calculate RMSE
 rmse = np.sqrt(mean_squared_error(solution_data['POWER'], forecast_template['FORECAST']))
-print("Root Mean Squared Error (RMSE):", rmse)
+print("Forecast Multiple LR RMSE:", rmse)
 
 ### SIMPLE LINEAR REGRESSION ###
 X_lr = data['WS10']
@@ -68,13 +64,25 @@ y_lr = data['POWER']
 X_train_lr, X_test_lr, y_train_lr, y_test_lr = train_test_split(X_lr, y_lr, test_size=0.25, random_state=42)
 
 # Create and train the linear regression model
-lr_model = LinearRegression()
-lr_model.fit(X_train_lr.values.reshape(-1, 1), y_train_lr)
+simple_model = LinearRegression()
+simple_model.fit(X_train_lr.values.reshape(-1, 1), y_train_lr)
+
+# Make predictions
+y_pred_lr = simple_model.predict(X_test_lr.values.reshape(-1, 1))
+# Calculate RMSE for the test set
+simple_rmse_test = np.sqrt(mean_squared_error(y_test_lr, y_pred_lr))
+print("Simple LR RMSE on Test Set:", simple_rmse_test)
+simple_r2 = r2_score(y_test_lr, y_pred_lr)
+print("Simple LR R2 on Test Set:", simple_r2)
 
 forecast_X_lr = forecast_data['WS10']
 forecast_template_lr = pd.read_csv('Data/ForecastTemplate.csv')
 # Predict the power output using the trained model
-forecast_template_lr['FORECAST'] = lr_model.predict(forecast_X_lr.values.reshape(-1, 1))
+forecast_template_lr['FORECAST'] = simple_model.predict(forecast_X_lr.values.reshape(-1, 1))
+
+# Calculate RMSE
+simple_rmse = np.sqrt(mean_squared_error(solution_data['POWER'], forecast_template_lr['FORECAST']))
+print("Forecast Simple LR RMSE:", simple_rmse)
 
 # Convert TIMESTAMP to datetime for proper plotting
 solution_data['TIMESTAMP'] = pd.to_datetime(solution_data['TIMESTAMP'], format='%Y%m%d %H:%M')
@@ -85,11 +93,12 @@ all_days = pd.date_range(start=solution_data['TIMESTAMP'].min().date(),
 # Plot the data
 plt.figure(figsize=(15, 6))
 plt.plot(solution_data['TIMESTAMP'], solution_data['POWER'], label='Actual Power (Solution)', color='blue')
-plt.plot(solution_data['TIMESTAMP'], forecast_template['FORECAST'], label='Forecasted Power (Model)', color='orange')
-plt.plot(solution_data['TIMESTAMP'], forecast_template_lr['FORECAST'], label='Forecasted Power (Model_LR)', color='green')
+plt.plot(solution_data['TIMESTAMP'], forecast_template['FORECAST'], label='Forecasted Power (Multiple LR Model)', color='orange')
+plt.plot(solution_data['TIMESTAMP'], forecast_template_lr['FORECAST'], label='Forecasted Power (Simple LR Model)', color='green')
 plt.xticks(all_days, [day.strftime('%d') for day in all_days], rotation=45)
+
 # Add labels, legend, and title
-plt.xlabel('Date')
+plt.xlabel('Day of November 2013')
 plt.ylabel('Power')
 plt.title('Power Comparison: Actual vs Forecasted')
 plt.legend()
@@ -98,9 +107,3 @@ plt.tight_layout()
 
 # Show the plot
 plt.show()
-
-
-
-
-
-
