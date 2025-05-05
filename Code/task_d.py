@@ -18,7 +18,7 @@ Y = np.array([[0.50]])
 alpha = 0.4 
 
 epochs = 10000
-tolerance = 1e-6
+tolerance = 1e-5
 
 
 def sigmoid(x):
@@ -37,7 +37,7 @@ W_2 = np.array([[initial_weights[4],initial_weights[5]]])
 
 
 
-def training(W_1, W_2, X, Y, epochs = 10000, tolerance = 1e-6, 
+def training(W_1, W_2, X, Y, epochs = 10000, tolerance = 1e-5, 
 plot_loss=True):
      
     loss_history = []
