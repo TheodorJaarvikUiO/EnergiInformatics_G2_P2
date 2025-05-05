@@ -11,17 +11,17 @@ from keras import layers
 from sklearn.model_selection import RandomizedSearchCV
 
 # ------------------------------------------- Parameters -------------------------------------------------------------
-df = pd.read_csv('../Data/TrainData.csv')
+df = pd.read_csv('Data/TrainData.csv')
 df = df.drop(['U10', 'V10', 'WS10', 'U100', 'V100', 'WS100'], axis="columns")
-forecast_horizon = len(pd.read_csv('../Data/solution.csv'))
+forecast_horizon = len(pd.read_csv('Data/solution.csv'))
 
 n_steps = 500
 power = df['POWER'].values
 X = np.array([power[i:i + n_steps] for i in range(len(power) - n_steps)])
 X_pred_input = power[-n_steps:]
 
-df_prediction = pd.read_csv('../Data/solution.csv')
-solution = pd.read_csv('../Data/solution.csv')
+df_prediction = pd.read_csv('Data/solution.csv')
+solution = pd.read_csv('Data/solution.csv')
 
 # ------------------------------------------- Linear Regression Model --------------------------------------------------
 print("(LR) started training")
@@ -40,9 +40,9 @@ for _ in range(forecast_horizon):
     recursive_input[0, -1] = next_pred
 
 lr_results = pd.DataFrame({'TIMESTAMP': df_prediction['TIMESTAMP'], 'POWER': recursive_predictions})
-lr_results.to_csv('../Results/Task3/ForecastTemplate3-LR.csv', index=False)
+lr_results.to_csv('Results/Task3/ForecastTemplate3-LR.csv', index=False)
 
-solution = pd.read_csv('../Data/Solution.csv')
+solution = pd.read_csv('Data/Solution.csv')
 rmse_lr = np.sqrt(mean_squared_error(solution['POWER'], recursive_predictions))
 
 print(f"Linear Regression RMSE: {rmse_lr:.4f}")
@@ -59,7 +59,7 @@ plt.title('Linear Regression')
 plt.legend()
 plt.xticks(rotation=45)
 plt.tight_layout()
-plt.savefig('../Results/Task3/LR_Predicted.png')
+plt.savefig('Results/Task3/LR_Predicted.png')
 plt.close()
 
 # ------------------------------------------- Support Vector Regression ------------------------------------------------
@@ -96,7 +96,7 @@ for _ in range(forecast_horizon):
     recursive_input[0, -1] = pred
 
 svr_results = pd.DataFrame({'TIMESTAMP': df_prediction['TIMESTAMP'], 'POWER': recursive_predictions})
-svr_results.to_csv('../Results/Task3/ForecastTemplate3-SVR.csv', index=False)
+svr_results.to_csv('Results/Task3/ForecastTemplate3-SVR.csv', index=False)
 
 rmse_svr = np.sqrt(mean_squared_error(solution['POWER'], recursive_predictions))
 
@@ -113,17 +113,17 @@ plt.ylabel('Power')
 plt.title('Support Vector Regression')
 plt.legend()
 plt.tight_layout()
-plt.savefig('../Results/Task3/SVR_Predicted.png')
+plt.savefig('Results/Task3/SVR_Predicted.png')
 plt.close()
 
 # ------------------------------------------- Artificial Neural Network ------------------------------------------------
 print("(ANN) started training")
 
 y = np.array([power[i + n_steps:i + n_steps + forecast_horizon]
-              for i in range(len(power) - n_steps - forecast_horizon + 1)])
+                     for i in range(len(power) - n_steps - forecast_horizon + 1)])
 
 X = np.array([power[i:i + n_steps]
-              for i in range(len(power) - n_steps - forecast_horizon + 1)])
+                     for i in range(len(power) - n_steps - forecast_horizon + 1)])
 
 ann_model = MLPRegressor(activation='relu', max_iter=500)
 
@@ -151,7 +151,7 @@ print("(ANN) Best parameters found:", ann_random_search.best_params_)
 print("(ANN) started predicting")
 direct_predictions = ann_random_search.predict(X_pred_input.reshape(1, -1))[0]
 ann_results = pd.DataFrame({'TIMESTAMP': df_prediction['TIMESTAMP'], 'POWER': direct_predictions})
-ann_results.to_csv('../Results/Task3/ForecastTemplate3-ANN.csv', index=False)
+ann_results.to_csv('Results/Task3/ForecastTemplate3-ANN.csv', index=False)
 
 rmse_ann = np.sqrt(mean_squared_error(solution['POWER'], direct_predictions))
 
@@ -168,7 +168,7 @@ plt.ylabel('Power')
 plt.title('Artificial Neural Network')
 plt.legend()
 plt.tight_layout()
-plt.savefig('../Results/Task3/ANN_Predicted.png')
+plt.savefig('Results/Task3/ANN_Predicted.png')
 plt.close()
 
 # ------------------------------------------- Recurring Neural Network -------------------------------------------------
@@ -209,7 +209,7 @@ X_rnn_pred_input = df['POWER'].values[-n_steps:].reshape(1, n_steps, 1)
 rnn_direct_preds = model.predict(X_rnn_pred_input)[0]
 
 rnn_results = pd.DataFrame({'TIMESTAMP': df_prediction['TIMESTAMP'], 'POWER': rnn_direct_preds})
-rnn_results.to_csv('../Results/Task3/ForecastTemplate3-RNN.csv', index=False)
+rnn_results.to_csv('Results/Task3/ForecastTemplate3-RNN.csv', index=False)
 
 rmse_rnn = np.sqrt(mean_squared_error(solution['POWER'], rnn_direct_preds))
 print(f"Recurrent Neural Network RMSE: {rmse_rnn:.4f}")
@@ -225,7 +225,7 @@ plt.ylabel('Power')
 plt.title('Recurrent Neural Network')
 plt.legend()
 plt.tight_layout()
-plt.savefig('../Results/Task3/RNN_Predicted.png')
+plt.savefig('Results/Task3/RNN_Predicted.png')
 plt.close()
 
 # ------------------------------------------- Plotting -----------------------------------------------------------------
@@ -236,13 +236,14 @@ plt.ylabel('RMSE')
 plt.title('RMSE Comparison')
 plt.grid()
 plt.tight_layout()
-plt.savefig('../Results/Task3/RMSE.png')
+plt.savefig('Results/Task3/RMSE.png')
 plt.close()
 
 print(f"Linear Regression RMSE: {rmse_lr:.4f}")
 print(f"SVR RMSE: {rmse_svr:.4f}")
 print(f"Artificial Neural Network RMSE: {rmse_ann:.4f}")
 print(f"RNN RMSE: {rmse_rnn:.4f}")
+
 
 
 
