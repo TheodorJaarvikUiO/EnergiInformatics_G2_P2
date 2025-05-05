@@ -212,6 +212,7 @@ plt.title('Linear Regression: Actual vs Forecast')
 plt.legend()
 plt.grid()
 plt.tight_layout()
+plt.savefig('Results/LR.png')
 plt.show()
 
 # Plot KNN
@@ -227,6 +228,7 @@ plt.title('KNN: Actual vs Forecast')
 plt.legend()
 plt.grid()
 plt.tight_layout()
+plt.savefig('Results/KNN.png')
 plt.show()
 
 # Plot SVR
@@ -242,6 +244,7 @@ plt.title('SVR: Actual vs Forecast')
 plt.legend()
 plt.grid()
 plt.tight_layout()
+plt.savefig('Results/SVR.png')
 plt.show()
 
 # Plot Neural Network
@@ -257,4 +260,5 @@ plt.title('Neural Network: Actual vs Forecast')
 plt.legend()
 plt.grid()
 plt.tight_layout()
+plt.savefig('Results/NN.png')
 plt.show()
